@@ -41,14 +41,13 @@ class Application:
         current_behavior (Behavior): Currently active behavior
     """
 
-    name: str = "default_application_name"
     ip_address: str = "127.0.0.1:9559"
     current_behavior: Behavior
     qi_application: qi.Application
     session: qi.Session
     services: dict[str, object]
 
-    def __init__(self, application_name: str, ip: str):
+    def __init__(self, ip: str):
         """
         Initialize the NAO robot application.
 
@@ -56,7 +55,6 @@ class Application:
             application_name (str): Name of the application
             ip (str): IP address of the NAO robot
         """
-        self.name = application_name
         self.ip_address = ip
         print("Starting application...")
         self.qi_application = qi.Application(
