@@ -99,6 +99,7 @@ class Behavior:
     memory_service = None
     marker_service = None
     tts_service = None
+    atts_service = None
 
     touch_subscribers = []
     marker_subscribers = []
@@ -119,6 +120,7 @@ class Behavior:
         self.memory_service = use_service(self, "ALMemory")
         self.marker_service = use_service(self, "ALLandMarkDetection")
         self.tts_service = use_service(self, "ALTextToSpeech")
+        self.atts_service = use_service(self, "ALAnimatedSpeech")
 
     def activate(self) -> None:
         """
@@ -153,14 +155,23 @@ class Behavior:
         self.motion_service.rest()
         self.set_motor_force(0)
 
-    def say(self, message: str):
+    def set_speak_speed(self, speed: int):
+        self.tts_service.setParameter("speed", max(50, min(400, speed)))
+
+    def reset_speak_speed(self):
+        self.tts_service.resetSpeed()
+
+    def say(self, message: str, use_animation=True):
         """
         Make the robot speak the given message.
 
         Args:
             message (str): Text to be spoken
         """
-        self.tts_service.say(message)
+        if use_animation:
+            self.atts_service.say(message)
+        else:
+            self.tts_service.say(message)
 
     def on_body_touched(self, callback: Callable, body_part: Optional[str] = None):
         """
