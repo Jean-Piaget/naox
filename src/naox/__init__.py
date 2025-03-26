@@ -96,6 +96,8 @@ class Behavior:
     session: qi.Session
     _active: bool = False
 
+    posture_service = None
+    motion_service = None
     memory_service = None
     marker_service = None
     tts_service = None
@@ -113,9 +115,12 @@ class Behavior:
         print("Initializing behavior...")
         self.application = application
         self.session = application.session
+
+        self.posture_service = use_service(self, "ALRobotPosture")
+        self.motion_service = use_service(self, "ALMotion")
         self.memory_service = use_service(self, "ALMemory")
-        self.tts_service = use_service(self, "ALTextToSpeech")
         self.marker_service = use_service(self, "ALLandMarkDetection")
+        self.tts_service = use_service(self, "ALTextToSpeech")
 
     def activate(self) -> None:
         """
@@ -136,6 +141,19 @@ class Behavior:
         if self._active:
             self._active = False
             self.on_deactivate()
+
+    def set_motor_force(self, force: float):
+        names = "Body"
+        stiffnessLists = max(0.0, min(1.0, force))
+        timeLists = 1.0
+        self.motion_service.stiffnessInterpolation(names, stiffnessLists, timeLists)
+
+    def stand_up(self):
+        self.motion_service.wakeUp()
+
+    def sit_down(self):
+        self.motion_service.rest()
+        self.set_motor_force(0)
 
     def say(self, message: str):
         """
@@ -201,7 +219,7 @@ class Behavior:
 
         self.on_body_touched(touch_callback, body_part)
         touch_event.wait()
-        self.subscribers.clear()
+        self.touch_subscribers.clear()
 
         return touched_part[0]
 
